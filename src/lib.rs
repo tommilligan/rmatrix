@@ -169,6 +169,7 @@ impl Column {
     }
     fn new_rand_char(&mut self) {
         self.col[0].val = rand_char();
+        self.col[0].color = self.col[1].color;
     }
     fn new_rand_head(&mut self, config: &Config) {
         self.col[0].val = rand_char();
