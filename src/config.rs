@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+use std::fs;
+
 use pancurses::*;
 
 use structopt::StructOpt;
@@ -40,6 +43,10 @@ struct Opt {
     #[structopt(short = "r", long = "rainbow")]
     /// Rainbow mode
     rainbow: bool,
+
+    #[structopt(short = "a", long = "asciiart", parse(from_os_str))]
+    /// Output file
+    asciiart: Option<PathBuf>,
 }
 
 fn validate_update(n: &str) -> Result<usize, &'static str> {
@@ -47,6 +54,29 @@ fn validate_update(n: &str) -> Result<usize, &'static str> {
         if n <= 10 { return Ok(n) }
     }
     Err("must be a number between 1 and 10")
+}
+
+pub struct AsciiArt {
+    m: Vec<Vec<char>>,
+}
+
+impl AsciiArt {
+    pub fn new(s: String) -> Self {
+        AsciiArt {
+            m: s
+                .split("\n")
+                .map(|line| {
+                    line.chars().collect()
+                })
+                .collect(),
+        }
+    }
+    pub fn get(&self, i: usize, j: usize) -> Option<&char> {
+        match self.m.get(j) {
+            Some(line) => line.get(i * 2),
+            None => None
+        }
+    } 
 }
 
 /// The global state object
@@ -59,6 +89,7 @@ pub struct Config {
     pub update: usize,
     pub colour: i16,
     pub rainbow: bool,
+    pub asciiart: Option<AsciiArt>,
     pub pause: bool,
 }
 
@@ -78,6 +109,10 @@ impl Config {
             "black" => COLOR_BLACK,
             _ => unreachable!(),
         };
+        let asciiart = match opt.asciiart.as_ref() {
+            Some(path) => Some(AsciiArt::new(fs::read_to_string(path).unwrap())),
+            None => None
+        };
 
         Config {
             bold: opt.bold,
@@ -88,6 +123,7 @@ impl Config {
             update: opt.update,
             rainbow: opt.rainbow,
             colour,
+            asciiart,
             pause: false,
         }
     }

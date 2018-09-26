@@ -122,6 +122,14 @@ impl Matrix {
             for i in 0..self.cols {
                 window.mv(j as i32 - 1, 2 * i as i32); // Move the cursor
                 // Pick the colour we need
+                let mut mval = self[i][j].val;
+                if let Some(art) = &config.asciiart {
+                    if mval != ' ' {
+                        if let Some(c) = art.get(i, j) {
+                            mval = *c;
+                        }
+                    };
+                };
                 let mcolour = if config.rainbow {
                     match gen::<usize>() % 6 {
                         0 => COLOR_GREEN,
@@ -139,7 +147,7 @@ impl Matrix {
                 };
                 // Draw the character
                 window.attron(COLOR_PAIR(mcolour as u32));
-                window.addch(self[i][j].val as u32);
+                window.addch(mval as u32);
                 window.attroff(COLOR_PAIR(mcolour as u32));
             }
         }
