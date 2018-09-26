@@ -125,14 +125,29 @@ impl Matrix {
             for i in 0..self.cols {
                 window.mv(j as i32 - 1, 2 * i as i32); // Move the cursor
                 // Pick the colour we need
+                let mut mval: char = self[i][j].val;
                 let mcolour = if self[i][j].white {
                     COLOR_WHITE
+                } else if i >= 10 && i < 80 && j >= 10 && j < 28 {
+                    if j < 13 {
+                        COLOR_RED
+                    } else if j < 16 {
+                        COLOR_YELLOW
+                    } else if j < 19 {
+                        COLOR_GREEN
+                    } else if j < 22 {
+                        COLOR_CYAN
+                    } else if j < 25 {
+                        COLOR_BLUE
+                    } else {
+                        COLOR_MAGENTA
+                    }
                 } else {
                     self[i][j].color
                 };
                 // Draw the character
                 window.attron(COLOR_PAIR(mcolour as u32));
-                window.addch(self[i][j].val as u32);
+                window.addch(mval as u32);
                 window.attroff(COLOR_PAIR(mcolour as u32));
             }
         }
